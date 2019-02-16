@@ -29,6 +29,8 @@ func NewSync(l *log.Logger, t Target) *Sync {
 	return &Sync{l:l, t: t}
 }
 
+var sep = string(os.PathSeparator)
+
 func (s *Sync) Sync(dst, src string) error {
 	s.l.Printf("building file index...")
 	start := time.Now()
@@ -38,6 +40,8 @@ func (s *Sync) Sync(dst, src string) error {
 	}
 	indexTime := time.Since(start)
 
+	s.l.Printf("syncing...")
+
 	start = time.Now()
 	err = s.clear(dst)
 	if err != nil {
@@ -45,17 +49,16 @@ func (s *Sync) Sync(dst, src string) error {
 	}
 	clearTime := time.Since(start)
 
-	if !strings.HasSuffix(dst, "/") {
-		dst = dst + "/"
+	if !strings.HasSuffix(dst, sep) {
+		dst = dst + sep
 	}
-
-	if !strings.HasSuffix(src, "/") {
-		src = src + "/"
+	if !strings.HasSuffix(src, sep) {
+		src = src + sep
 	}
 
 	start = time.Now()
 	for _, f := range files {
-		path := dst + strings.TrimPrefix(f, src)
+		path := filepath.Join(dst, strings.TrimPrefix(f, src))
 		s.l.Printf("CREATE %v", path)
 
 		in, err := os.Open(f)
@@ -85,8 +88,8 @@ func (s *Sync) Sync(dst, src string) error {
 }
 
 func (s *Sync) clear(dir string) error {
-	if !strings.HasSuffix(dir, "/") {
-		dir = dir + "/"
+	if !strings.HasSuffix(dir, sep) {
+		dir = dir + sep
 	}
 
 	var directories []string
