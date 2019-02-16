@@ -45,13 +45,18 @@ func (s *Sync) Sync(dst, src string) error {
 	}
 	clearTime := time.Since(start)
 
+	if !strings.HasSuffix(dst, "/") {
+		dst = dst + "/"
+	}
+
+	if !strings.HasSuffix(src, "/") {
+		src = src + "/"
+	}
+
 	start = time.Now()
 	for _, f := range files {
-		if !strings.HasSuffix(dst, "/") {
-			dst = dst + "/"
-		}
 		path := dst + strings.TrimPrefix(f, src)
-		s.l.Printf("ADD %v", path)
+		s.l.Printf("CREATE %v", path)
 
 		in, err := os.Open(f)
 		if err != nil {
@@ -74,7 +79,7 @@ func (s *Sync) Sync(dst, src string) error {
 	s.l.Printf("Successfully synced %d files.", len(files))
 	s.l.Printf("INDEX:  %s", indexTime)
 	s.l.Printf("DELETE: %s", clearTime)
-	s.l.Printf("ADD:    %s", addTime)
+	s.l.Printf("CREATE: %s", addTime)
 
 	return nil
 }
