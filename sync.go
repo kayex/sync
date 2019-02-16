@@ -139,7 +139,6 @@ func (s *Sync) prepDir(path string) error {
 }
 
 func buildFileIndex(dir string) ([]string, error) {
-	fmt.Println(dir)
 	var files []string
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if f.IsDir() {
