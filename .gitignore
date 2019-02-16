@@ -2,6 +2,6 @@
 .idea/
 
 # Executables
-driverstats
-driverstats-linux
+sync
+sync-windows.exe
 
