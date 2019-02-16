@@ -1,4 +1,4 @@
-package main
+package sync
 
 import (
 	"fmt"
@@ -11,6 +11,8 @@ import (
 
 type Target interface {
 	Write(r io.Reader, key string) error
+	Exists(dir string) (bool, error)
+	MkdirAll(path string) error
 }
 
 type Sync struct {
@@ -29,7 +31,7 @@ func (s *Sync) Sync(dst, src string) error {
 	}
 
 	for _, f := range files {
-		s.l.Printf("syncing %v", f)
+		s.l.Printf("ADD %v", f)
 
 		in, err := os.Open(f)
 		if err != nil {
@@ -40,10 +42,34 @@ func (s *Sync) Sync(dst, src string) error {
 			dst = dst + "/"
 		}
 		path := dst + f
+
+		err = s.prepDir(path)
+		if err != nil {
+			return fmt.Errorf("failed creating directories: %v", err)
+		}
+
 		err = s.t.Write(in, path)
 		if err != nil {
 			return fmt.Errorf("failed copying %v: %v", f, err)
 		}
+	}
+
+	return nil
+}
+
+func (s *Sync) prepDir(path string) error {
+	dir := filepath.Dir(path)
+	exists, err := s.t.Exists(dir)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+
+	err = s.t.MkdirAll(dir)
+	if err != nil {
+		return err
 	}
 
 	return nil

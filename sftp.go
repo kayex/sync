@@ -1,10 +1,11 @@
-package main
+package sync
 
 import (
 	"fmt"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"io"
+	"os"
 )
 
 type Host struct {
@@ -70,4 +71,19 @@ func (t *SFTPTarget) Write(r io.Reader, path string) error {
 		return fmt.Errorf("failed writing file: %v", err)
 	}
 	return nil
+}
+
+func (t *SFTPTarget) Exists(path string) (bool, error) {
+	_, err := t.sftp.Stat(path)
+	if err == nil {
+		return true, nil
+	} else if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func (t *SFTPTarget) MkdirAll(dir string) error {
+	// TODO: Read up on what mkdir does when dir already exists.
+	return t.sftp.MkdirAll(dir)
 }
