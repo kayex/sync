@@ -2,17 +2,22 @@ package sync
 
 import (
 	"fmt"
+	"github.com/kr/fs"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type Target interface {
-	Write(r io.Reader, key string) error
+	Write(r io.Reader, path string) error
 	Exists(dir string) (bool, error)
-	MkdirAll(path string) error
+	Remove(path string) error
+	RemoveDir(dir string) error
+	CreateDirAll(path string) error
+	Walk(root string) *fs.Walker
 }
 
 type Sync struct {
@@ -25,11 +30,22 @@ func NewSync(l *log.Logger, t Target) *Sync {
 }
 
 func (s *Sync) Sync(dst, src string) error {
+	s.l.Printf("building file index...")
+	start := time.Now()
 	files, err := buildFileIndex(src)
 	if err != nil {
 		return fmt.Errorf("failed listing files: %v", err)
 	}
+	indexTime := time.Since(start)
 
+	start = time.Now()
+	err = s.clear(dst)
+	if err != nil {
+		return fmt.Errorf("failed deleting files on target: %v", err)
+	}
+	clearTime := time.Since(start)
+
+	start = time.Now()
 	for _, f := range files {
 		s.l.Printf("ADD %v", f)
 
@@ -53,6 +69,54 @@ func (s *Sync) Sync(dst, src string) error {
 			return fmt.Errorf("failed copying %v: %v", f, err)
 		}
 	}
+	addTime := time.Since(start)
+
+	s.l.Println()
+	s.l.Printf("Successfully synced %d files.", len(files))
+	s.l.Printf("INDEX:  %s", indexTime)
+	s.l.Printf("DELETE: %s", clearTime)
+	s.l.Printf("ADD:    %s", addTime)
+
+	return nil
+}
+
+func (s *Sync) clear(dir string) error {
+	if !strings.HasSuffix(dir, "/") {
+		dir = dir + "/"
+	}
+
+	var directories []string
+
+	walker := s.t.Walk(dir)
+	for walker.Step() {
+		if err := walker.Err(); err != nil {
+			return err
+		}
+		if walker.Path() == dir {
+			continue
+		}
+
+		if walker.Stat().IsDir() {
+			directories = append(directories, walker.Path())
+			continue
+		}
+
+		s.l.Printf("DELETE %v", walker.Path())
+		err := s.t.Remove(walker.Path())
+		if err != nil {
+			return fmt.Errorf("failed deleting %v: %v", walker.Path(), err)
+		}
+	}
+
+	for i := len(directories) - 1; i >= 0; i-- {
+		d := directories[i]
+		s.l.Printf("DELETE %v", d)
+		err := s.t.RemoveDir(d)
+		if err != nil {
+			return fmt.Errorf("failed deleting %v: %v", d, err)
+		}
+
+	}
 
 	return nil
 }
@@ -67,7 +131,7 @@ func (s *Sync) prepDir(path string) error {
 		return nil
 	}
 
-	err = s.t.MkdirAll(dir)
+	err = s.t.CreateDirAll(dir)
 	if err != nil {
 		return err
 	}

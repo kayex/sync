@@ -2,6 +2,7 @@ package sync
 
 import (
 	"fmt"
+	"github.com/kr/fs"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"io"
@@ -83,7 +84,19 @@ func (t *SFTPTarget) Exists(path string) (bool, error) {
 	return false, err
 }
 
-func (t *SFTPTarget) MkdirAll(dir string) error {
+func (t *SFTPTarget) CreateDirAll(dir string) error {
 	// TODO: Read up on what mkdir does when dir already exists.
 	return t.sftp.MkdirAll(dir)
+}
+
+func (t *SFTPTarget) Remove(path string) error {
+	return t.sftp.Remove(path)
+}
+
+func (t *SFTPTarget) RemoveDir(dir string) error {
+	return t.sftp.Remove(dir)
+}
+
+func (t *SFTPTarget) Walk(root string) *fs.Walker {
+	return t.sftp.Walk(root)
 }

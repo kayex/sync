@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stderr, "", log.LstdFlags)
+	l := log.New(os.Stdout, "", 0)
 
 	if len(os.Args) < 4 {
 		l.Fatal("usage: sync target destination source")
@@ -22,7 +22,7 @@ func main() {
 	src := os.Args[3]
 
 	target := sync.NewSFTPTarget(host)
-	l.Printf("dialing tcp://%v:%v@%v:%d", host.User, host.Password, host.Location, host.Port)
+	l.Printf("dialing tcp://%v:%v", host.Location, host.Port)
 	err := target.Connect()
 	if err != nil {
 		l.Fatal(err)
@@ -63,12 +63,4 @@ func parseTargetURI(uri string) sync.Host {
 		Password: password,
 		Port: port,
 	}
-}
-
-func req(key string) string {
-	v := os.Getenv(key)
-	if v == "" {
-		panic(fmt.Errorf("missing required environment variable %v", key))
-	}
-	return v
 }
