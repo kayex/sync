@@ -66,7 +66,7 @@ func (s *Sync) Sync(dst, src string) error {
 			return fmt.Errorf("failed opening source file: %v", err)
 		}
 
-		err = s.prepDir(path)
+		err = s.createDir(path)
 		if err != nil {
 			return fmt.Errorf("failed creating directories: %v", err)
 		}
@@ -117,7 +117,6 @@ func (s *Sync) clear(dir string) error {
 
 	for i := len(directories) - 1; i >= 0; i-- {
 		d := directories[i]
-		s.l.Printf("DELETE %v", d)
 		err := s.t.RemoveDir(d)
 		if err != nil {
 			return fmt.Errorf("failed deleting %v: %v", d, err)
@@ -128,7 +127,7 @@ func (s *Sync) clear(dir string) error {
 	return nil
 }
 
-func (s *Sync) prepDir(path string) error {
+func (s *Sync) createDir(path string) error {
 	dir := filepath.Dir(path)
 	exists, err := s.t.Exists(dir)
 	if err != nil {
