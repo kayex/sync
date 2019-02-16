@@ -1,0 +1,7 @@
+# JetBrains IDE
+.idea/
+
+# Executables
+driverstats
+driverstats-linux
+
