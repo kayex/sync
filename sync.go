@@ -99,6 +99,7 @@ func (s *Sync) clear(dir string) error {
 		if err := walker.Err(); err != nil {
 			return err
 		}
+
 		if walker.Path() == dir {
 			continue
 		}
