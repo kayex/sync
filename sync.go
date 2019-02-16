@@ -47,17 +47,16 @@ func (s *Sync) Sync(dst, src string) error {
 
 	start = time.Now()
 	for _, f := range files {
-		s.l.Printf("ADD %v", f)
+		if !strings.HasSuffix(dst, "/") {
+			dst = dst + "/"
+		}
+		path := dst + strings.TrimPrefix(f, src)
+		s.l.Printf("ADD %v", path)
 
 		in, err := os.Open(f)
 		if err != nil {
 			return fmt.Errorf("failed opening source file: %v", err)
 		}
-
-		if !strings.HasSuffix(dst, "/") {
-			dst = dst + "/"
-		}
-		path := dst + f
 
 		err = s.prepDir(path)
 		if err != nil {
@@ -140,11 +139,13 @@ func (s *Sync) prepDir(path string) error {
 }
 
 func buildFileIndex(dir string) ([]string, error) {
+	fmt.Println(dir)
 	var files []string
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if f.IsDir() {
 			return nil
 		}
+
 		files = append(files, path)
 		return nil
 	})
