@@ -6,7 +6,10 @@ import (
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"io"
+	"net"
+	"net/url"
 	"os"
+	"strconv"
 )
 
 type Host struct {
@@ -99,4 +102,34 @@ func (t *SFTPTarget) RemoveDir(dir string) error {
 
 func (t *SFTPTarget) Walk(root string) *fs.Walker {
 	return t.sftp.Walk(root)
+}
+
+func ParseTargetURI(uri string) Host {
+	u, err := url.Parse(uri)
+	if err != nil {
+		panic(fmt.Errorf("failed parsing target URI: %v", err))
+	}
+
+	host, p, err := net.SplitHostPort(u.Host)
+	if err != nil {
+		panic(fmt.Errorf("failed parsing target URI: %v", err))
+	}
+
+	port := 0
+	if p != "" {
+		port, err = strconv.Atoi(p)
+		if err != nil {
+			panic(fmt.Errorf("failed parsing target port: %v", err))
+		}
+	}
+
+	user := u.User.Username()
+	password, _ := u.User.Password()
+
+	return Host{
+		Location: host,
+		User: user,
+		Password: password,
+		Port: port,
+	}
 }
