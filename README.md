@@ -1,6 +1,5 @@
 # Sync
-Sync is a simple file sync utility that mirrors the contents of a local directory into a directory on a remote server using SFTP.
-
+Sync is a simple file sync utility that replaces the contents of a remote directory with those of a local one using SFTP.
 # Build
 ```sh
 go build -o sync cmd/sync/main.go
