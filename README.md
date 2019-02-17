@@ -11,7 +11,7 @@ Replaces contents of remote directory `destination` with contents of local direc
 sync user:password@host:port destination source
 ```
 
-For example, to copy the contents of local directory `dist` to remote directory `/www`
+For example, to replace the contents of remote directory `/www` with those of local directory `dist`
 ```sh
 sync user:password@example.com:22 /www dist
 ```
