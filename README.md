@@ -1,5 +1,5 @@
 # Sync
-Sync is a simple SFTP file sync utility that mirrors the contents of a local directory to a directory on a remote server.
+Sync is a simple file sync utility that mirrors the contents of a local directory into a directory on a remote server using SFTP.
 
 # Build
 ```sh
