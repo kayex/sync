@@ -149,6 +149,10 @@ func (s *Sync) createDir(path string) error {
 func buildFileIndex(dir string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			return err;
+		}
+		
 		if f.IsDir() {
 			return nil
 		}
