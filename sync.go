@@ -82,7 +82,7 @@ func (s *Sync) Sync(dst, src string) error {
 	s.l.Printf("Successfully synced %d files.", len(files))
 	s.l.Printf("INDEX:  %s", indexTime)
 	s.l.Printf("DELETE: %s", clearTime)
-	s.l.Printf(": %s", addTime)
+	s.l.Printf("CREATE: %s", addTime)
 
 	return nil
 }
