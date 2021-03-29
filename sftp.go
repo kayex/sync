@@ -49,7 +49,7 @@ func (t *SFTPTarget) Connect() error {
 
 	sftp, err := sftp.NewClient(t.ssh)
 	if err != nil {
-		return fmt.Errorf("failed startin SFTP session: %v", err)
+		return fmt.Errorf("failed starting SFTP session: %v", err)
 	}
 	t.sftp = sftp
 
