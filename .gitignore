@@ -3,8 +3,5 @@
 
 # Executables
 sync
-sync-windows.exe
-
-# Test
-src/
-
+sync-windows-amd64.exe
+sync-linux-amd64
