@@ -3,5 +3,6 @@
 
 # Executables
 sync
-sync-windows-amd64.exe
 sync-linux-amd64
+sync-darwin-amd64
+sync-windows-amd64.exe
